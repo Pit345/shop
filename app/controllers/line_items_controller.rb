@@ -1,5 +1,6 @@
 class LineItemsController < ApplicationController
   before_action :set_line_item, only: [:show, :edit, :update, :destroy]
+  before_action :set_cart, only: :create
 
   # GET /line_items
   # GET /line_items.json
@@ -24,16 +25,13 @@ class LineItemsController < ApplicationController
   # POST /line_items
   # POST /line_items.json
   def create
-    @line_item = LineItem.new(line_item_params)
+    product = Product.find(params[:product_id])
+    @line_item = @cart.line_items.build(product: product)
 
-    respond_to do |format|
-      if @line_item.save
-        format.html { redirect_to @line_item, notice: 'Line item was successfully created.' }
-        format.json { render :show, status: :created, location: @line_item }
-      else
-        format.html { render :new }
-        format.json { render json: @line_item.errors, status: :unprocessable_entity }
-      end
+    if @line_item.save
+      redirect_to @line_item.cart, notice: 'Line item was successfully created.'
+    else
+      render :new
     end
   end
 
@@ -70,5 +68,12 @@ class LineItemsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def line_item_params
       params.require(:line_item).permit(:belongs_to, :belongs_to)
+    end
+
+    def set_cart
+      @cart = Cart.find(session[:cart_id])
+    rescue ActiveRecord::RecordNotFound
+      @cart = Cart.create
+      session[:cart_id] = @cart.id
     end
 end

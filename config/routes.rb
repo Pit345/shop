@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  root 'store#index'
+  root 'products#index'
 
   resources :line_items
   resources :carts
